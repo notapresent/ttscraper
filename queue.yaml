@@ -1,0 +1,6 @@
+queue:
+# Set the task rate of the default queue to one task every 2 seconds
+- name: default
+  rate: 30/m
+  max_concurrent_requests: 1
+  bucket_size: 1

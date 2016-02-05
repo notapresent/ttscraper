@@ -1,0 +1,4 @@
+cron:
+- description: update tracker feed every 5 minutes
+  url: /tasks/index
+  schedule: every 5 minutes synchronized
