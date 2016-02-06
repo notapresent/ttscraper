@@ -107,10 +107,8 @@ class WebClientTestCase(unittest.TestCase):
         with self.assertRaises(RuntimeError):
             wc.tracker_log_in()
 
-    @patch('webclient.Account')
-    def test_get_index_page_posts_to_correct_url(self, mock_account_cls):
+    def test_get_index_page_posts_to_correct_url(self):
         url = 'http://{}/forum/tracker.php'.format(WebClient.TRACKER_HOST)
-        mock_account_cls.get_one = Mock(return_value=self.mock_account)
 
         wc = WebClient(self.mock_session, self.mock_account)
         wc.get_index_page()
