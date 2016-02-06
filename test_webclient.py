@@ -117,18 +117,30 @@ class WebClientTestCase(unittest.TestCase):
 
         self.mock_session.request.assert_called_once_with('POST', url, data=WebClient.INDEX_FORM_DATA)
 
-    @patch('webclient.Account')
-    def test_get_index_page_returns_content(self, mock_account_cls):
-        test_content = 'Test content'
-        mock_account = Mock(cookies={'somekey': 'somevalue'})
-        mock_account_cls.get_one = Mock(return_value=mock_account)
+    def test_get_index_page_returns_content(self):
+        userid = 12345
+        test_content = 'Test content {}'.format(userid)
+        self.mock_account.cookies = {'somekey': 'somevalue'}
+        self.mock_account.userid = userid
         mock_response = Mock(text=test_content)
-        mock_session = Mock(request=Mock(return_value=mock_response))
+        self.mock_session.request = Mock(return_value=mock_response)
 
-        wc = WebClient(mock_session)
+        wc = WebClient(self.mock_session, self.mock_account)
         result = wc.get_index_page()
 
         self.assertEqual(result, test_content)
+
+    def test_get_index_page_raises_if_cookie_login_failed(self):
+        test_content = 'Content without userid'
+        self.mock_account.cookies = {'somekey': 'somevalue'}
+        self.mock_account.userid = 12345
+        mock_response = Mock(text=test_content)
+        self.mock_session.request = Mock(return_value=mock_response)
+
+        wc = WebClient(self.mock_session, self.mock_account)
+
+        with self.assertRaises(RuntimeError):
+            result = wc.get_index_page()
 
     @patch('webclient.Account')
     def test_user_request_logs_in(self, mock_account_cls):

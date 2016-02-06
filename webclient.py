@@ -27,8 +27,11 @@ class WebClient(object):
         """Returns page with latest torrents list"""
         url = 'http://{}/forum/tracker.php'.format(self.TRACKER_HOST)
         resp = self.user_request('POST', url, data=self.INDEX_FORM_DATA)
+
         resp.raise_for_status()
-        # assert u'Вы зашли как:' in resp.text  # TODO
+        if isinstance(resp.text, basestring) and not self.is_logged_in(resp.text):
+            raise RuntimeError('{} - Cookie login failed'.format(self.account))
+
         return resp.text
 
     def log_in(self):
@@ -56,8 +59,12 @@ class WebClient(object):
         resp = self.session.post(url, data=data)
 
         resp.raise_for_status()
-        if isinstance(resp.text, basestring) and str(self.account.userid) not in resp.text:
+        if isinstance(resp.text, basestring) and not self.is_logged_in(resp.text):
             raise RuntimeError('Tracker login failed')
+
+    def is_logged_in(self, html):
+        """Checks if page was downloaded with user logged in"""
+        return str(self.account.userid) in html
 
 
 def login_form_data(acc):
