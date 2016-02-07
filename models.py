@@ -1,6 +1,20 @@
 from google.appengine.ext import ndb
 
 
+class Torrent(ndb.Model):
+    """A main model for representing an individual Torrent entry."""
+    title = ndb.StringProperty(indexed=False, required=True)
+    btih = ndb.StringProperty(indexed=False, required=True)     # Infohash
+    dt = ndb.DateTimeProperty(required=True)                    # Create/update time, as reported by tracker
+    nbytes = ndb.IntegerProperty(indexed=False, required=True)      # Torrent data size, bytes
+
+    @classmethod
+    def get_latest_dt(cls):
+        """Returns datetime for most recent torrent"""
+        latest_torrent = cls.query().order(-Torrent.dt).get()
+        return latest_torrent.dt
+
+
 class Account(ndb.Model):
     """Represents tracker user account along with its session"""
     username = ndb.StringProperty(indexed=False, required=True)

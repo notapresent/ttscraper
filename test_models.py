@@ -1,3 +1,4 @@
+import datetime
 import unittest
 import logging
 
@@ -6,7 +7,7 @@ from google.appengine.ext.db import BadValueError
 from google.appengine.ext import testbed
 from google.appengine.datastore import datastore_stub_util
 
-from models import Account
+from models import Account, Torrent
 
 
 class DatastoreTestCase(unittest.TestCase):
@@ -72,3 +73,44 @@ class AccountTestCase(DatastoreTestCase):
         result = Account.get_one()
 
         self.assertEqual(acc, result)
+
+
+class TorrentTestCase(DatastoreTestCase):
+    def setUp(self):
+        super(TorrentTestCase, self).setUp()
+        self.title = 'Torrent title'
+        self.btih = '1234567890ABCDEF'
+        self.nbytes = 1234567890
+        self.dt = datetime.datetime.now()
+
+    def test_required_fields_are_required(self):
+        no_title = Torrent(btih=self.btih, nbytes=self.nbytes, dt=self.dt)
+        no_btih = Torrent(title=self.title, nbytes=self.nbytes, dt=self.dt)
+        no_nbytes = Torrent(title=self.title, btih=self.btih, dt=self.dt)
+        no_dt = Torrent(title=self.title, btih=self.btih, nbytes=self.nbytes)
+
+        with self.assertRaises(BadValueError):
+            no_title.put()
+
+        with self.assertRaises(BadValueError):
+            no_btih.put()
+
+        with self.assertRaises(BadValueError):
+            no_nbytes.put()
+
+        with self.assertRaises(BadValueError):
+            no_dt.put()
+
+    def test_get_latest_dt_returns_lstest(self):
+        now = datetime.datetime.now()
+        yesterday = now - datetime.timedelta(1)
+        t1 = Torrent(title=self.title, btih=self.btih, nbytes=self.nbytes, dt=yesterday)
+        t2 = Torrent(title=self.title, btih=self.btih, nbytes=self.nbytes, dt=now)
+        t1.put()
+        t2.put()
+
+        rv = Torrent.get_latest_dt()
+
+        self.assertEqual(rv, now)
+
+
