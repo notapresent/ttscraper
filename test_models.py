@@ -4,6 +4,7 @@ import logging
 from google.appengine.ext import ndb
 from google.appengine.ext.db import BadValueError
 from google.appengine.ext import testbed
+from google.appengine.datastore import datastore_stub_util
 
 from models import Account
 
@@ -14,8 +15,12 @@ class DatastoreTestCase(unittest.TestCase):
         self.testbed = testbed.Testbed()
         # Then activate the testbed, which prepares the service stubs for use.
         self.testbed.activate()
-        # Next, declare which service stubs you want to use.
-        self.testbed.init_datastore_v3_stub()
+
+        # Create a consistency policy that will simulate the High Replication
+        # consistency model.
+        self.policy = datastore_stub_util.PseudoRandomHRConsistencyPolicy(probability=1)
+        # Initialize the datastore stub with this policy.
+        self.testbed.init_datastore_v3_stub(consistency_policy=self.policy)
         self.testbed.init_memcache_stub()
         # Clear ndb's in-context cache between tests.
         ndb.get_context().clear_cache()
@@ -30,30 +35,40 @@ class DatastoreTestCase(unittest.TestCase):
 
 
 class AccountTestCase(DatastoreTestCase):
-    def test_account_is_stored(self):
-        username = 'testuser'
-        password = 'testpassword'
-        userid = 12345
+    def setUp(self):
+        super(AccountTestCase, self).setUp()
+        self.username = 'testuser'
+        self.password = 'testpassword'
+        self.userid = 123
 
-        acc = Account(username=username, password=password, userid=userid)
+    def test_account_is_stored(self):
+        acc = Account(username=self.username, password=self.password, userid=self.userid)
         key = acc.put()
         stored = key.get()
 
-        self.assertEqual(stored.username, username)
-        self.assertEqual(stored.password, password)
-        self.assertEqual(stored.userid, userid)
+        self.assertEqual(stored.username, self.username)
+        self.assertEqual(stored.password, self.password)
+        self.assertEqual(stored.userid, self.userid)
 
     def test_username_is_required(self):
-        acc = Account(password='abc123', userid=123)
+        acc = Account(password=self.password, userid=self.userid)
         with self.assertRaises(BadValueError):
             acc.put()
 
     def test_password_is_required(self):
-        acc = Account(username='abc123', userid=123)
+        acc = Account(username=self.username, userid=self.userid)
         with self.assertRaises(BadValueError):
             acc.put()
 
     def test_userid_is_required(self):
-        acc = Account(password='abc123', username='abc123')
+        acc = Account(password=self.password, username=self.username)
         with self.assertRaises(BadValueError):
             acc.put()
+
+    def test_get_one_returns_entity(self):
+        acc = Account(username=self.username, password=self.password, userid=self.userid)
+        acc.put()
+
+        result = Account.get_one()
+
+        self.assertEqual(acc, result)
