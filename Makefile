@@ -8,6 +8,10 @@ ADMIN_PORT      = 8081
 SERVE_ADDRESS   = 0.0.0.0
 DATASTORE_PATH  = ../datastore.sqlite3
 
+init:
+	pip install -r requirements.txt
+	pip install -r requirements-prod.txt -t ttupdater/lib
+
 test:
 	cd ttupdater && $(PYTHON) testrunner.py $(APPENGINE) .
 
@@ -25,7 +29,7 @@ serve:
 	--host $(SERVE_ADDRESS) --port $(PORT) \
 	--admin_host $(SERVE_ADDRESS) --admin_port $(ADMIN_PORT) \
 	--datastore_path=$(DATASTORE_PATH) \
-	.
+	ttupdater
 
 console:
 	@$(PYTHON) $(APPENGINE)/remote_api_shell.py -s $(APP_ID).appspot.com
