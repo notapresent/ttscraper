@@ -49,7 +49,7 @@ class WebClient(object):
     def user_request(self, *args, **kwargs):
         """Issue a web request on behalf of tracker user"""
         self.log_in()
-        return self.session.request(*args, **kwargs)
+        return self.session.request(*args, **kwargs)    # FIXME Handle cookies expiring
 
     def tracker_log_in(self):
         """Submit user credentials to tracker"""
