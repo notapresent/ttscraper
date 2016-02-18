@@ -20,8 +20,14 @@ handlers:
   script: handlers.manage_handler
   login: admin
 
-- url: /.*
+- url: /public/.*
   script: handlers.public_handler
+
+# site root
+- url: /
+  static_files: static/index.html
+  upload: static/index.html
+
 
 libraries:
 - name: webapp2
@@ -40,5 +46,3 @@ skip_files:
 - ^(.*/)?.*\.py[co]$
 - ^(.*/)?.*/RCS/.*$
 - ^(.*/)?\..*$
-- ^Makefile
-- ^requirements-.*
