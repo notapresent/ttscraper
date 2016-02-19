@@ -1,3 +1,4 @@
+import datetime
 from google.appengine.ext import ndb
 
 
@@ -12,7 +13,10 @@ class Torrent(ndb.Model):
     def get_latest_dt(cls):
         """Returns datetime for most recent torrent"""
         latest_torrent = cls.query().order(-Torrent.dt).get()
-        return latest_torrent.dt
+        if latest_torrent:
+            return latest_torrent.dt
+        else:
+            return datetime.datetime.utcfromtimestamp(0)
 
 
 class Account(ndb.Model):
