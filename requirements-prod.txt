@@ -1,1 +1,2 @@
-requests==2.9.1
+# Until GAE support gets merged into requests, we use patched version
+git+git://github.com/notapresent/requests.git
