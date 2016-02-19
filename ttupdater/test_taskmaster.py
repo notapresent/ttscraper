@@ -3,7 +3,7 @@ from google.appengine.ext import testbed
 from mock import Mock, patch
 
 from taskmaster import TaskMaster
-from parser import TorrentEntry
+from parsers import TorrentEntry
 
 
 class TaskMasterTestCase(unittest.TestCase):
@@ -19,8 +19,7 @@ class TaskMasterTestCase(unittest.TestCase):
         self.testbed.deactivate()
 
     def test_add_torrent_task_enqueues(self):
-        te = dict(tid=123, title=u'Torrent title', timestamp=12345, nbytes=54321)
-
+        te = TorrentEntry(123, u'Torrent title', 12345, 54321)
         tm = TaskMaster()
         tm.add_torrent_task(te)
 
@@ -35,7 +34,8 @@ class TaskMasterTestCase(unittest.TestCase):
         self.assertEqual(len(tasks), 1)
 
     def test_add_new_torrents_adds_all(self):
-        fake_entries = [{} for _ in range(5)]
+        te = TorrentEntry(123, u'Torrent title', 12345, 54321)
+        fake_entries = [te for _ in range(5)]
         mock_scraper = Mock(get_new_torrents=Mock(return_value=fake_entries))
 
         tm = TaskMaster()
