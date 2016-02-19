@@ -1,5 +1,6 @@
 # coding: utf-8
 import requests
+
 from models import Account
 
 
@@ -36,6 +37,7 @@ class WebClient(object):
 
     def log_in(self):
         """Sets session cookies from account or via tracker login"""
+        # TODO refactor this to context manager
         if not self.account:
             self.account = Account.get_one()
 
