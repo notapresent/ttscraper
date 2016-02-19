@@ -19,7 +19,7 @@ class TaskMaster(object):
 
     def add_new_torrents(self, scraper=None):
         """Enqueues tasks for all new torrents"""
-        scrp = scraper or Scraper()
+        scrp = scraper or Scraper()     # FIXME move this somewhere else
 
         new_entries = scrp.get_new_torrents()
         for e in new_entries:

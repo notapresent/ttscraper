@@ -3,7 +3,7 @@ from google.appengine.ext import testbed
 from mock import Mock, patch
 
 from taskmaster import TaskMaster
-from parsers import TorrentEntry
+from parser import TorrentEntry
 
 
 class TaskMasterTestCase(unittest.TestCase):
