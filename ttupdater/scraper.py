@@ -1,16 +1,14 @@
 from datetime import datetime
 
 from models import Torrent
-from webclient import WebClient
-from parser import Parser
 
 
 class Scraper(object):
+    """Extracts torrent data from tracker"""
     def __init__(self, webclient, parser):
         self.webclient = webclient
         self.parser = parser
 
-    """Extracts torrent data from tracker"""
     def get_new_torrents(self):
         """Returns list of torent entries for new torrents"""
         index_html = self.webclient.get_index_page()
@@ -27,5 +25,5 @@ class Scraper(object):
 def filter_new_entries(entries):
     """Returns only new entries from the list"""
     dt_threshold = Torrent.get_latest_dt()     # XXX not sure where to put this
-    return [e for e in entries if datetime.utcfromtimestamp(entry.ts) >= dt_threshold]
+    return [e for e in entries if datetime.utcfromtimestamp(e.ts) >= dt_threshold]
 
