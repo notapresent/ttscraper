@@ -42,4 +42,4 @@ class TaskMasterTestCase(unittest.TestCase):
         tm.add_new_torrents(mock_scraper)
 
         tasks = self.taskqueue_stub.get_filtered_tasks()
-        self.assertEqual(len(tasks), 5)
+        self.assertEqual(len(tasks), len(fake_entries))
