@@ -1,5 +1,6 @@
 # coding: utf-8
 """Everythong related to parsing tracker responses"""
+# TODO rename this module to avoid conflicts with stdlib parser
 from collections import namedtuple
 from lxml import etree, cssselect
 

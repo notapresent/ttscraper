@@ -1,7 +1,7 @@
 # coding: utf-8
 import unittest
 
-from parser import TorrentEntry, Parser, make_tree
+from parsers import TorrentEntry, Parser, make_tree
 
 
 SAMPLE_ROW = '''
