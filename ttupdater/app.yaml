@@ -20,9 +20,6 @@ handlers:
   script: handlers.manage_handler
   login: admin
 
-- url: /public/.*
-  script: handlers.public_handler
-
 # site root
 - url: /
   static_files: static/index.html
