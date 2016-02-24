@@ -91,6 +91,16 @@ class WebClientTestCase(URLFetchTestCase):
         webclient.get_torrent_page(1)
         self.session.request.assert_called_once_with('GET', 'http://rutracker.org/forum/viewtopic.php?t=1')
 
+    def test_tracker_log_in_url_and_method(self):
+        webclient = WebClient(self.session)
+        mock_acc = Mock(username='user', password='password', userid=12345)
+
+        webclient.tracker_log_in(mock_acc)
+        formdata = WebClient.login_form_data(mock_acc)
+
+        self.session.request.assert_called_once_with('POST',
+                                                     'http://login.rutracker.org/forum/login.php',
+                                                     data=formdata)
 
 class WebClientIntegrationTestCase(BetamaxTestCase):
     def test_get_torrent_page(self):

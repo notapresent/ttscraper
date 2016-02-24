@@ -9,8 +9,8 @@ class BaseWebClient(object):
     """Base class for tracker adapters"""
     ENCODING = 'utf-8'      # Default encoding for text responses
 
-    def __init__(self, session):
-        self.session = session
+    def __init__(self, session=None):
+        self.session = session or requests.Session()
 
     def request(self, url, method='GET', **kwargs):
         """Send an actual http request, raise WebError on error"""
@@ -66,7 +66,7 @@ class WebClient(BaseWebClient):
     INDEX_URL = 'http://rutracker.org/forum/tracker.php'
     INDEX_FORM_DATA = {'prev_new': 0, 'prev_oop': 0, 'f[]': -1, 'o': 1, 's': 2, 'tm': -1, 'oop': 1}
     ENCODING = 'windows-1251'
-    USER_MARKER = ('<a class="logged-in-as-uname"'
+    USER_MARKER = ('<a class="logged-in-as-uname" '
                    'href="http://rutracker.org/forum/profile.php?mode=viewprofile&amp;u={}">')
 
     def get_torrent_page(self, tid):
@@ -83,23 +83,27 @@ class WebClient(BaseWebClient):
 
     def tracker_log_in(self, account):
         """Log in user via tracker log in form, returns True if login succeeded"""
-        formdata = {
+        formdata = WebClient.login_form_data(account)
+
+        resp = self.request(self.LOGIN_URL, method='POST', data=formdata)
+        html = self.get_text(resp)
+
+        if html and not WebClient.is_logged_in(html, account):
+            raise LoginFailed("Server login failed for {} ".format(account))
+
+    @classmethod
+    def is_logged_in(cls, html, account):
+        """Check if the page was requested with user logged in"""
+        marker = cls.USER_MARKER.format(account.userid)
+        return marker in html
+
+    @classmethod
+    def login_form_data(cls, account):
+        return {
             'login_password': account.password,
             'login_username': account.username,
             'login': 'Whatever'        # Must be non-empty
         }
-
-        resp = self.request(url, method='POST', data=formdata)
-        html = self.get_text(resp)
-
-        if not self.is_logged_in(html, account):
-            raise LoginFailed("Server login failed for {} ".format(account))
-
-    @staticmethod
-    def is_logged_in(html, account):
-        """Check if the page was requested with user logged in"""
-        marker = self.USER_MARKER.format(account.userid)
-        return marker in html
 
 
 class WebError(RuntimeError):
