@@ -1,78 +1,117 @@
 # coding: utf-8
+"""Webclient is responsible for comunicating with tracker via HTTP"""
 import requests
 
 from models import Account
 
 
-class WebClient(object):
-    """Comunicates with tracker via HTTP"""
-    TRACKER_HOST = 'rutracker.org'
-    INDEX_FORM_DATA = {'prev_new': 0, 'prev_oop': 0, 'f[]': -1, 'o': 1, 's': 2, 'tm': -1, 'oop': 1}
+class BaseWebClient(object):
+    """Base class for tracker adapters"""
+    ENCODING = 'utf-8'      # Default encoding for text responses
 
-    def __init__(self, session=None, account=None):
-        self.session = session or requests.Session()
-        self.account = account
+    def __init__(self, session):
+        self.session = session
+
+    def request(self, url, method='GET', **kwargs):
+        """Send an actual http request, raise WebError on error"""
+        try:
+            resp = self.session.request(method, url, **kwargs)
+            if not resp.ok:
+                resp.raise_for_status()
+        except requests.exceptions.RequestException as e:
+            raise WebError(str(e))
+        return resp
+
+    def user_request(self, account, url, method='GET',  **kwargs):
+        """Send request on behalf of tracker user, handle session cookies"""
+        if account.cookies:
+            self.session.cookies.update(account.cookies)
+        else:
+            self.tracker_log_in(account)
+            account.cookies = self.session.cookies.get_dict()
+
+        try:
+            resp = self.authorized_request(account, url, method,  **kwargs)
+        except NotLoggedIn as e:
+            account.cookies = None
+            raise
+
+        return resp
+
+    def authorized_request(self, account, url, method,  **kwargs):
+        """Issue HTTP request and raise NotLoggedIn if user was not authorised on server"""
+        resp = self.request(url, method, **kwargs)
+        html = self.get_text(resp)
+
+        if html and not self.is_logged_in(html, account):
+            raise NotLoggedIn('User {} is not logged in'.format(account))
+
+        return resp
+
+    def get_text(self, response):
+        """Returns response text for text responses, None for non-text"""
+        if 'text' in response.headers['content-type']:
+            response.encoding = self.ENCODING
+            return response.text
+
+    def is_logged_in(self, html, account):
+        """Returns true if html response has user account info"""
+        return account.userid in html
+
+
+class WebClient(BaseWebClient):
+    """Tracker-specific adapter"""
+    TORRENT_PAGE_URL = 'http://rutracker.org/forum/viewtopic.php?t={}'
+    LOGIN_URL = 'http://login.rutracker.org/forum/login.php'
+    INDEX_URL = 'http://rutracker.org/forum/tracker.php'
+    INDEX_FORM_DATA = {'prev_new': 0, 'prev_oop': 0, 'f[]': -1, 'o': 1, 's': 2, 'tm': -1, 'oop': 1}
+    ENCODING = 'windows-1251'
+    USER_MARKER = ('<a class="logged-in-as-uname"'
+                   'href="http://rutracker.org/forum/profile.php?mode=viewprofile&amp;u={}">')
 
     def get_torrent_page(self, tid):
         """"Returns torrent page content"""
-        url = self.torrent_page_url(tid)
-        resp = self.session.get(url)
-        resp.raise_for_status()
-        return resp.text
-
-    def torrent_page_url(self, tid):
-        """Returns torrent page url"""
-        return 'http://{}/forum/viewtopic.php?t={}'.format(self.TRACKER_HOST, tid)
+        url = self.TORRENT_PAGE_URL.format(tid)
+        resp = self.request(url)
+        return self.get_text(resp)
 
     def get_index_page(self):
         """Returns page with latest torrents list"""
-        url = 'http://{}/forum/tracker.php'.format(self.TRACKER_HOST)
-        resp = self.user_request('POST', url, data=self.INDEX_FORM_DATA)
+        with Account.get_context() as account:
+            resp = self.user_request(account, self.INDEX_URL, method='POST', data=self.INDEX_FORM_DATA)
+        return self.get_text(resp)
 
-        resp.raise_for_status()
-        if isinstance(resp.text, basestring) and not self.is_logged_in(resp.text):
-            raise RuntimeError('{} - Cookie login failed'.format(self.account))
+    def tracker_log_in(self, account):
+        """Log in user via tracker log in form, returns True if login succeeded"""
+        formdata = {
+            'login_password': account.password,
+            'login_username': account.username,
+            'login': 'Whatever'        # Must be non-empty
+        }
 
-        return resp.text
+        resp = self.request(url, method='POST', data=formdata)
+        html = self.get_text(resp)
 
-    def log_in(self):
-        """Sets session cookies from account or via tracker login"""
-        # TODO refactor this to context manager
-        if not self.account:
-            self.account = Account.get_one()
+        if not self.is_logged_in(html, account):
+            raise LoginFailed("Server login failed for {} ".format(account))
 
-        if self.account.cookies:
-            self.session.cookies.update(self.account.cookies)
-        else:
-            self.tracker_log_in()
-            self.account.cookies = self.session.cookies.get_dict()
-            self.account.put()
-
-    def user_request(self, *args, **kwargs):
-        """Issue a web request on behalf of tracker user"""
-        self.log_in()
-        return self.session.request(*args, **kwargs)    # FIXME Handle cookies expiring
-
-    def tracker_log_in(self):
-        """Submit user credentials to tracker"""
-        url = 'http://login.{}/forum/login.php'.format(self.TRACKER_HOST)
-        data = login_form_data(self.account)
-
-        resp = self.session.post(url, data=data)
-
-        resp.raise_for_status()
-        if isinstance(resp.text, basestring) and not self.is_logged_in(resp.text):
-            raise RuntimeError('Tracker login failed')
-
-    def is_logged_in(self, html):
-        """Checks if page was downloaded with user logged in"""
-        return str(self.account.userid) in html
+    @staticmethod
+    def is_logged_in(html, account):
+        """Check if the page was requested with user logged in"""
+        marker = self.USER_MARKER.format(account.userid)
+        return marker in html
 
 
-def login_form_data(acc):
-    """Helper function to make login form data"""
-    return {
-        'login_password': acc.password,
-        'login_username': acc.username,
-        'login': 'Whatever'        # Must be non-empty
-    }
+class WebError(RuntimeError):
+    """Base class for all exceptions in this module"""
+    pass
+
+
+class LoginFailed(WebError):
+    """Server login failed"""
+    pass
+
+
+class NotLoggedIn(WebError):
+    """User is not logged in"""
+    pass
