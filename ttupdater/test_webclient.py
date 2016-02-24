@@ -84,6 +84,17 @@ class BaseWebClientTestCase(URLFetchTestCase):
 
         self.session.cookies.update.assert_called_once_with(cookies)
 
+    def test_user_request_updates_user_cookies(self):
+        cookies = {'name': 'value'}
+        mock_acc = Mock(cookies=None)
+        self.session.cookies.get_dict = Mock(return_value=cookies)
+        wc = BaseWebClient(self.session)
+        wc.tracker_log_in = Mock(return_value=cookies)
+
+        wc.user_request(mock_acc, 'http://example.com')
+
+        self.assertIs(mock_acc.cookies, cookies)
+
 
 class WebClientTestCase(URLFetchTestCase):
     def test_get_torrent_page_url_and_method(self):
