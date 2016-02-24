@@ -1,4 +1,6 @@
 import datetime
+from contextlib import contextmanager
+
 from google.appengine.ext import ndb
 
 
@@ -24,9 +26,25 @@ class Account(ndb.Model):
     username = ndb.StringProperty(indexed=False, required=True)
     password = ndb.StringProperty(indexed=False, required=True)
     userid = ndb.IntegerProperty(indexed=False, required=True)
-    cookies = ndb.PickleProperty()
+    cookies = ndb.JsonProperty()
 
     @classmethod
     def get_one(cls):
         """Return one entry"""
         return cls.query().get()
+
+    def __repr__(self):
+        return "<Account username='{}' userid='{}' cookies=[{}]".format(
+            self.username, self.userid, self.cookies and self.cookies.keys())
+
+    @classmethod
+    @contextmanager
+    def get_context(cls):
+        """Provides account context and saves account if it was changed"""
+        account = cls.get_one()
+        values = account.to_dict()
+
+        yield account
+
+        if account.to_dict() != values:
+            account.put()
