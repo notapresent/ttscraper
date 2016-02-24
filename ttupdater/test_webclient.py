@@ -52,7 +52,7 @@ class BaseWebClientTestCase(URLFetchTestCase):
     @patch('webclient.BaseWebClient.is_logged_in')
     def test_authorized_request_raises(self, is_logged_in):
         is_logged_in.return_value = False
-        mock_response = MagicMock(headers={'content-type':'text/html'})
+        mock_response = MagicMock(headers={'content-type': 'text/html'})
         self.session.request = Mock(return_value=mock_response)
         wc = BaseWebClient(self.session)
 
@@ -60,7 +60,7 @@ class BaseWebClientTestCase(URLFetchTestCase):
             wc.authorized_request(Mock(), 'http://example.com/', 'GET')
 
     def test_get_text_returns_text(self):
-        mock_response = MagicMock(headers={'content-type':'text/html'}, text='some text')
+        mock_response = MagicMock(headers={'content-type': 'text/html'}, text='some text')
         wc = BaseWebClient(None)
 
         rv = wc.get_text(mock_response)
@@ -68,7 +68,7 @@ class BaseWebClientTestCase(URLFetchTestCase):
         self.assertEqual(rv, 'some text')
 
     def test_get_text_returns_none_for_binary(self):
-        mock_response = MagicMock(headers={'content-type':'application/blah'})
+        mock_response = MagicMock(headers={'content-type': 'application/blah'})
         wc = BaseWebClient(None)
 
         rv = wc.get_text(mock_response)
@@ -112,6 +112,7 @@ class WebClientTestCase(URLFetchTestCase):
         self.session.request.assert_called_once_with('POST',
                                                      'http://login.rutracker.org/forum/login.php',
                                                      data=formdata)
+
 
 class WebClientIntegrationTestCase(BetamaxTestCase):
     def test_get_torrent_page(self):

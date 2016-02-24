@@ -13,7 +13,7 @@ class TaskMaster(object):
     def add_torrent_task(self, torrent_entry):
         """"Enqueue task for torrent entry represented by parser.TorrentEntry named tuple"""
         params = torrent_entry._asdict()
-        task = Task(url='/tasks/torrent',params=params)
+        task = Task(url='/tasks/torrent', params=params)
         self.queue.add(task)
 
     def add_new_torrents(self, scraper):

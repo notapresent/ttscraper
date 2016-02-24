@@ -66,4 +66,3 @@ def make_tree(html):
     """Make lxml.etree from html"""
     htmlparser = etree.HTMLParser(encoding='utf-8')
     return etree.fromstring(html, parser=htmlparser)
-

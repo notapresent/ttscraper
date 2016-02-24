@@ -26,4 +26,3 @@ def filter_new_entries(entries):
     """Returns only new entries from the list"""
     dt_threshold = Torrent.get_latest_dt()     # XXX not sure where to put this
     return [e for e in entries if datetime.utcfromtimestamp(e.ts) >= dt_threshold]
-

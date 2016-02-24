@@ -1,3 +1,4 @@
+"""All datastore models live in this module"""
 import datetime
 from contextlib import contextmanager
 

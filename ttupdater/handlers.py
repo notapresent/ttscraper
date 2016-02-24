@@ -13,10 +13,12 @@ class IndexTaskHandler(webapp2.RequestHandler):
         taskmaster.add_new_torrents(scraper)
         taskmaster.add_feed_update_task()
 
+
 class TorrentTaskHandler(webapp2.RequestHandler):
     """Starts individual torrent import task"""
     def post(self):
         pass
+
 
 class DashboardHandler(webapp2.RequestHandler):
     def get(self):

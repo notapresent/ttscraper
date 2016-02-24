@@ -112,5 +112,3 @@ class TorrentTestCase(DatastoreTestCase):
         rv = Torrent.get_latest_dt()
 
         self.assertEqual(rv, now)
-
-
