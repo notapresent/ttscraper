@@ -6,7 +6,7 @@ from scraper import Scraper
 
 
 class ObjectBuilder(object):
-    def make_tracker_scraper(self):
+    def make_scraper(self):
         return Scraper(WebClient(), Parser())
 
     def make_taskmaster(self):
