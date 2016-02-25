@@ -21,7 +21,6 @@ class TaskMaster(object):
         """Enqueues tasks for all new torrents"""
         try:
             new_entries = scraper.get_new_torrents()
-            if len(new_entries) > 3: new_entries = new_entries[0:3]
 
         except webclient.NotLoggedIn:   # Session expired
             pass
