@@ -13,11 +13,11 @@ handlers:
   static_dir: static
 
 - url: /task/.*
-  script: handlers.task_app
+  script: apps.task_app
   login: admin
 
 - url: /manage/.*
-  script: handlers.manage_app
+  script: apps.manage_app
   login: admin
 
 # site root

@@ -5,9 +5,9 @@ from taskmaster import TaskMaster
 from scraper import Scraper
 
 
-class ObjectBuilder(object):
-    def make_scraper(self):
-        return Scraper(WebClient(), Parser())
+def make_scraper():
+    return Scraper(WebClient(), Parser())
 
-    def make_taskmaster(self):
-        return TaskMaster()
+
+def make_taskmaster():
+    return TaskMaster()
