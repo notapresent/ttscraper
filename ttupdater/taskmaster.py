@@ -1,5 +1,7 @@
 from google.appengine.api.taskqueue import Queue, Task
 
+import webclient
+
 
 class TaskMaster(object):
     """Creates and enqueues tasks"""
@@ -17,6 +19,12 @@ class TaskMaster(object):
 
     def add_new_torrents(self, scraper):
         """Enqueues tasks for all new torrents"""
-        new_entries = scraper.get_new_torrents()
-        for e in new_entries:
-            self.add_torrent_task(e)
+        try:
+            new_entries = scraper.get_new_torrents()
+        except webclient.NotLoggedIn:   # Session expired
+            pass
+        except webclient.RequestError:  # Tracker is down, happens sometimes
+            pass
+        else:
+            for e in new_entries:
+                self.add_torrent_task(e)
