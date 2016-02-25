@@ -21,6 +21,12 @@ class Torrent(ndb.Model):
         else:
             return datetime.datetime.utcfromtimestamp(0)
 
+    @classmethod
+    def save_torrent(cls, tid, title, btih, dt, nbytes):
+        parent = Category.get_root_key()
+        torrent = cls(id=tid, parent=parent, title=title, btih=btih, dt=dt, nbytes=nbytes)
+        torrent.put()
+
 
 class Account(ndb.Model):
     """Represents tracker user account along with its session"""
@@ -61,4 +67,4 @@ class Category(ndb.Model):
     @classmethod
     def get_root_key(cls):
         """Returns root category key for ancestor queries"""
-        return ndb.Key(cls, 0)
+        return ndb.Key(cls, 'r0')

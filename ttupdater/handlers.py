@@ -1,6 +1,7 @@
 import webapp2
 
 import builder
+import importers
 
 
 class IndexTaskHandler(webapp2.RequestHandler):
@@ -9,13 +10,26 @@ class IndexTaskHandler(webapp2.RequestHandler):
         taskmaster = builder.make_taskmaster()
         scraper = builder.make_scraper()
         taskmaster.add_new_torrents(scraper)
-        taskmaster.add_feed_update_task()
+        # taskmaster.add_feed_update_task()     # TODO uncomment
 
 
 class TorrentTaskHandler(webapp2.RequestHandler):
     """Starts individual torrent import task"""
     def post(self):
-        pass
+        param_keys = ['tid', 'title', 'timestamp', 'nbytes']
+        params = {key: self.request.get(key) for key in param_keys}
+        scraper = builder.make_scraper()
+        importers.import_torrent(scraper, params)
+
+
+class UpdateFeedsTaskHandler(webapp2.RequestHandler):
+    def post(self):
+        pass    # TODO
+
+
+class DailyCleanupTaskHandler(webapp2.RequestHandler):
+    def post(self):
+        pass    # TODO
 
 
 class DashboardHandler(webapp2.RequestHandler):

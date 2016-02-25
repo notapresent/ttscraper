@@ -1,7 +1,9 @@
 # coding: utf-8
 """Everythong related to parsing tracker responses"""
-# TODO rename this module to avoid conflicts with stdlib parser
+import urlparse
 from lxml import etree, cssselect
+
+from util import debug_dump
 
 
 class BaseParser(object):
@@ -22,11 +24,17 @@ class Parser(BaseParser):
 
     def parse_torrent_page(self, html):
         tree = make_tree(html)
-        return {
-            'categories': self.torrent_categories(tree),
-            'description': self.torrent_description(tree),
-            'btih': self.torrent_btih(tree)
-        }
+        try:
+            rv = {
+                'categories': self.torrent_categories(tree),
+                'description': self.torrent_description(tree),
+                'btih': self.torrent_btih(tree)
+            }
+        except IndexError as e:
+            debug_dump('/debug/parser/index_error', html)
+            raise Error(str(e))
+
+        return rv
 
     def parse_index_table(self, html):
         tree = make_tree(html)
@@ -97,9 +105,18 @@ class Parser(BaseParser):
         return ''.join(contents_list)
 
     def torrent_btih(self, tree):
-        btih_selector = cssselect.CSSSelector('span#tor-hash')
+        btih_selector = cssselect.CSSSelector('.attach_link.guest > a')
         elem = btih_selector(tree)[0]
-        return elem.text
+
+        return btih_from_href(elem.attrib['href'])
+
+
+def btih_from_href(url):
+    """Extracts infohash from magnet link"""
+    parsed = urlparse.urlparse(url)
+    params = urlparse.parse_qs(parsed.query)
+    xt = params['xt'][0]
+    return xt[9:]
 
 
 def make_tree(html):

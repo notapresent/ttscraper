@@ -1,4 +1,8 @@
 cron:
 - description: update tracker feed every 5 minutes
-  url: /tasks/index
+  url: /task/index
   schedule: every 5 minutes synchronized
+
+- description: Daily cleanup every day at 12:00 UTC
+  url: /task/dailycleanup
+  schedule: every day 12:00

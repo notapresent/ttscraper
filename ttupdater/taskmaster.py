@@ -10,17 +10,19 @@ class TaskMaster(object):
 
     def add_feed_update_task(self):
         """Enqueue task updating feeds"""
-        self.queue.add(Task(url='/tasks/update_feeds'))
+        self.queue.add(Task(url='/task/update_feeds'))
 
     def add_torrent_task(self, torrent_entry):
         """"Enqueue task for torrent entry represented by dict"""
-        task = Task(url='/tasks/torrent', params=torrent_entry)
+        task = Task(url='/task/torrent', params=torrent_entry)
         self.queue.add(task)
 
     def add_new_torrents(self, scraper):
         """Enqueues tasks for all new torrents"""
         try:
             new_entries = scraper.get_new_torrents()
+            if len(new_entries) > 3: new_entries = new_entries[0:3]
+
         except webclient.NotLoggedIn:   # Session expired
             pass
         except webclient.RequestError:  # Tracker is down, happens sometimes
