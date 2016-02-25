@@ -1,7 +1,7 @@
 # coding: utf-8
 import unittest
 
-from parsers import TorrentEntry, Parser, make_tree
+from parsers import Parser, make_tree
 
 
 SAMPLE_ROW = '''
@@ -23,13 +23,13 @@ class ParserTestCase(unittest.TestCase):
 
         self.assertEqual(len(rows), 10)
 
-    def test_parse_index_row_returns_namedtuple(self):
+    def test_parse_index_row_returns_dict(self):
         p = Parser()
         elem = make_tree(SAMPLE_ROW)
 
         result = p.parse_index_row(elem)
 
-        self.assertEqual(type(result), TorrentEntry)
+        self.assertEqual(type(result), dict)
 
     def test_index_tid_returns_tid(self):
         p = Parser()

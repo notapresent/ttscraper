@@ -1,18 +1,13 @@
 # coding: utf-8
 """Everythong related to parsing tracker responses"""
 # TODO rename this module to avoid conflicts with stdlib parser
-from collections import namedtuple
 from lxml import etree, cssselect
-
-
-# Represents one torrent entry from tracker index page
-TorrentEntry = namedtuple('TorrentEntry', 'tid,title,ts,nbytes')
 
 
 class BaseParser(object):
     """Abstract base class for tracker response parser"""
     def parse_index(self, html):
-        """Parse index html and return list of TorrentEntry"""
+        """Parse index html and return list of dicts"""
         raise NotImplementedError()
 
     def parse_torrent_page(self, html):
@@ -40,13 +35,18 @@ class Parser(BaseParser):
         return rows_selector(tree)
 
     def parse_index_row(self, row):
-        """Parse index row represented by lxml element and return TorrentEntry"""
+        """Parse index row represented by lxml element and return dict"""
         tid = self.index_tid(row)
         title = self.index_title(row)
         ts = self.index_timestamp(row)
         nbytes = self.index_nbytes(row)
 
-        return TorrentEntry(tid, title, ts, nbytes)
+        return {
+            'tid': tid,
+            'title': title,
+            'timestamp': ts,
+            'nbytes': nbytes
+            }
 
     def index_tid(self, elem):
         title_link_selector = cssselect.CSSSelector('td.t-title div.t-title a')
