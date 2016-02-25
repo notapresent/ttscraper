@@ -5,7 +5,7 @@ import requests
 from betamax import Betamax
 from betamax.fixtures.unittest import BetamaxTestCase
 
-from webclient import BaseWebClient, WebClient, WebError, NotLoggedIn
+from webclient import BaseWebClient, WebClient, Error, NotLoggedIn
 
 
 with Betamax.configure() as config:
@@ -37,7 +37,7 @@ class BaseWebClientTestCase(URLFetchTestCase):
         self.session.request = Mock(return_value=failed_resp)
 
         wc = BaseWebClient(self.session)
-        with self.assertRaises(WebError):
+        with self.assertRaises(Error):
             wc.request('http://example.com/')
 
     def test_authorized_request_returns_response(self):

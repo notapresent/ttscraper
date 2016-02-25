@@ -13,13 +13,13 @@ class BaseWebClient(object):
         self.session = session or requests.Session()
 
     def request(self, url, method='GET', **kwargs):
-        """Send an actual http request, raise WebError on error"""
+        """Send an actual http request, raise Error on error"""
         try:
             resp = self.session.request(method, url, **kwargs)
             if not resp.ok:
                 resp.raise_for_status()
         except requests.exceptions.RequestException as e:
-            raise WebError(str(e))
+            raise Error(str(e))
         return resp
 
     def user_request(self, account, url, method='GET',  **kwargs):
@@ -106,16 +106,16 @@ class WebClient(BaseWebClient):
         }
 
 
-class WebError(RuntimeError):
+class Error(RuntimeError):
     """Base class for all exceptions in this module"""
     pass
 
 
-class LoginFailed(WebError):
+class LoginFailed(Error):
     """Server login failed"""
     pass
 
 
-class NotLoggedIn(WebError):
+class NotLoggedIn(Error):
     """User is not logged in"""
     pass
