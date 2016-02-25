@@ -5,7 +5,7 @@ import requests
 from betamax import Betamax
 from betamax.fixtures.unittest import BetamaxTestCase
 
-from webclient import BaseWebClient, WebClient, Error, NotLoggedIn
+from webclient import BaseWebClient, WebClient, Error, NotLoggedIn, TIMEOUTS
 
 
 with Betamax.configure() as config:
@@ -29,7 +29,7 @@ class BaseWebClientTestCase(URLFetchTestCase):
         url = 'http://example.com/'
         webclient = BaseWebClient(self.session)
         resp = webclient.request(url)
-        self.session.request.assert_called_once_with('GET', url)
+        self.assertTrue(self.session.request.called)
 
     def test_request_raises(self):
         failed_resp = Mock(ok=False, status_code=500)
@@ -100,7 +100,8 @@ class WebClientTestCase(URLFetchTestCase):
     def test_get_torrent_page_url_and_method(self):
         webclient = WebClient(self.session)
         webclient.get_torrent_page(1)
-        self.session.request.assert_called_once_with('GET', 'http://rutracker.org/forum/viewtopic.php?t=1')
+        self.session.request.assert_called_once_with('GET', 'http://rutracker.org/forum/viewtopic.php?t=1',
+                                                     timeout=TIMEOUTS)
 
     def test_tracker_log_in_url_and_method(self):
         webclient = WebClient(self.session)
@@ -111,7 +112,7 @@ class WebClientTestCase(URLFetchTestCase):
 
         self.session.request.assert_called_once_with('POST',
                                                      'http://login.rutracker.org/forum/login.php',
-                                                     data=formdata)
+                                                     data=formdata, timeout=TIMEOUTS)
 
 
 class WebClientIntegrationTestCase(BetamaxTestCase):

@@ -5,6 +5,9 @@ import requests
 from models import Account
 
 
+TIMEOUTS = (3.05, 10)       # Connect, read
+
+
 class BaseWebClient(object):
     """Base class for tracker adapters"""
     ENCODING = 'utf-8'      # Default encoding for text responses
@@ -15,11 +18,12 @@ class BaseWebClient(object):
     def request(self, url, method='GET', **kwargs):
         """Send an actual http request, raise Error on error"""
         try:
-            resp = self.session.request(method, url, **kwargs)
+            resp = self.session.request(method, url, timeout=TIMEOUTS, **kwargs)
             if not resp.ok:
                 resp.raise_for_status()
         except requests.exceptions.RequestException as e:
-            raise Error(str(e))
+            raise RequestError(str(e))
+
         return resp
 
     def user_request(self, account, url, method='GET',  **kwargs):
@@ -108,6 +112,11 @@ class WebClient(BaseWebClient):
 
 class Error(RuntimeError):
     """Base class for all exceptions in this module"""
+    pass
+
+
+class RequestError(Error):
+    """HTTP-level error"""
     pass
 
 
