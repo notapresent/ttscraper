@@ -27,6 +27,16 @@ class Torrent(ndb.Model):
         torrent = cls(id=tid, parent=parent, title=title, btih=btih, dt=dt, nbytes=nbytes)
         torrent.put()
 
+    @classmethod
+    def save_from_dict(cls, d):
+        tid = int(d['tid'])
+        title = d['title']
+        btih = d['btih']
+        dt = datetime.datetime.utcfromtimestamp(int(d['timestamp']))
+        nbytes = int(d['nbytes'])
+        # TODO description
+        cls.save_torrent(tid, title, btih, dt, nbytes)
+
 
 class Account(ndb.Model):
     """Represents tracker user account along with its session"""
