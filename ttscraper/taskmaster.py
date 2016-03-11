@@ -10,11 +10,11 @@ class TaskMaster(object):
 
     def add_feed_update_task(self):
         """Enqueue task updating feeds"""
-        self.queue.add(Task(url='/task/update_feeds'))
+        self.queue.add(Task(url='/task/update_feeds'))  # TODO make url a parameter
 
     def add_torrent_task(self, torrent_entry):
         """"Enqueue task for torrent entry represented by dict"""
-        task = Task(url='/task/torrent', params=torrent_entry)
+        task = Task(url='/task/torrent', params=torrent_entry)  # TODO make url a parameter
         self.queue.add(task)
 
     def add_new_torrents(self, scraper):
