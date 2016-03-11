@@ -1,7 +1,7 @@
-ttupdater
+ttscraper
 =========
 
-RSS feeds generator for popular bittorrent trackers. Google App Engine edition.
+Torrent tracker scraping library, Google App Engine edition.
 
 
 Useful commands
@@ -11,8 +11,4 @@ Useful commands
 
 `make test` - run unit tests
 
-`make serve` - run developmant server
-
 See Makefile for more details
-
-

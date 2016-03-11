@@ -63,52 +63,6 @@ class BaseWebClient(object):
         return account.userid in html
 
 
-class WebClient(BaseWebClient):
-    """Tracker-specific adapter"""
-    TORRENT_PAGE_URL = 'http://rutracker.org/forum/viewtopic.php?t={}'
-    LOGIN_URL = 'http://login.rutracker.org/forum/login.php'
-    INDEX_URL = 'http://rutracker.org/forum/tracker.php'
-    INDEX_FORM_DATA = {'prev_new': 0, 'prev_oop': 0, 'f[]': -1, 'o': 1, 's': 2, 'tm': -1, 'oop': 1}
-    ENCODING = 'windows-1251'
-    USER_MARKER = ('<a class="logged-in-as-uname" '
-                   'href="http://rutracker.org/forum/profile.php?mode=viewprofile&amp;u={}">')
-
-    def get_torrent_page(self, tid):
-        """"Returns torrent page content"""
-        url = self.TORRENT_PAGE_URL.format(tid)
-        resp = self.request(url)
-        return self.get_text(resp)
-
-    def get_index_page(self):
-        """Returns page with latest torrents list"""
-        with Account.get_context() as account:
-            resp = self.user_request(account, self.INDEX_URL, method='POST', data=self.INDEX_FORM_DATA)
-        return self.get_text(resp)
-
-    def tracker_log_in(self, account):
-        """Log in user via tracker log in form, returns True if login succeeded"""
-        formdata = WebClient.login_form_data(account)
-
-        resp = self.request(self.LOGIN_URL, method='POST', data=formdata)
-        html = self.get_text(resp)
-
-        if html and not WebClient.is_logged_in(html, account):
-            raise LoginFailed("Server login failed for {} ".format(account))
-
-    @classmethod
-    def is_logged_in(cls, html, account):
-        """Check if the page was requested with user logged in"""
-        marker = cls.USER_MARKER.format(account.userid)
-        return marker in html
-
-    @classmethod
-    def login_form_data(cls, account):
-        return {
-            'login_password': account.password,
-            'login_username': account.username,
-            'login': 'Whatever'        # Must be non-empty
-        }
-
 
 class Error(RuntimeError):
     """Base class for all exceptions in this module"""

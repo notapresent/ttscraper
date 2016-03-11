@@ -17,39 +17,3 @@ init:
 
 test:
 	cd ttupdater && $(PYTHON) testrunner.py $(APPENGINE) .
-
-deploy:
-	$(APPCFG) -e $(EMAIL) update ttupdater
-
-update:
-	$(APPCFG) -e $(EMAIL) update ttupdater
-
-rollback:
-	$(APPCFG) -e $(EMAIL) rollback ttupdater
-
-serve:
-	$(PYTHON) $(APPENGINE)/dev_appserver.py \
-	--host $(SERVE_ADDRESS) --port $(PORT) \
-	--admin_host $(SERVE_ADDRESS) --admin_port $(ADMIN_PORT) \
-	--datastore_path=$(DATASTORE_PATH) \
-	ttupdater
-
-console:
-	@$(PYTHON) $(APPENGINE)/remote_api_shell.py -s $(APP_ID).appspot.com
-
-update-indexes:
-	$(APPCFG) update_indexes ttupdater
-
-vacuum-indexes:
-	$(APPCFG) vacuum_indexes ttupdater
-
-download-data:
-ifndef filename
-	@echo "Invalid usage. Try 'make help' for more details."
-else
-	$(APPCFG) download_data \
-	--application=$(APP_ID) \
-	--email=$(EMAIL) \
-	--url=http://$(APP_ID).appspot.com/_ah/remote_api \
-	--filename=$(filename)
-endif
