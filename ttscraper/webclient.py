@@ -1,5 +1,6 @@
 # coding: utf-8
 """Webclient is responsible for comunicating with tracker via HTTP"""
+import logging
 import requests
 
 from models import Account
@@ -14,6 +15,9 @@ class BaseWebClient(object):
 
     def __init__(self, session=None):
         self.session = session or requests.Session()
+        # Set logging level for libraries
+        logging.getLogger("requests").setLevel(logging.WARNING)
+        logging.getLogger("urllib3").setLevel(logging.WARNING)
 
     def request(self, url, method='GET', **kwargs):
         """Send an actual http request, raise Error on error"""
