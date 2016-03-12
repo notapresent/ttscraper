@@ -3,7 +3,7 @@
 import urlparse
 from lxml import etree, cssselect
 
-from util import debug_dump
+from debug import debug_dump
 
 
 class BaseParser(object):
