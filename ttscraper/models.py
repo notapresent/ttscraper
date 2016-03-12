@@ -23,7 +23,7 @@ class Torrent(ndb.Model):
 
     @classmethod
     def save_torrent(cls, tid, title, btih, dt, nbytes):
-        parent = Category.get_root_key()
+        parent = Category.get_root_key()    # TODO
         torrent = cls(id=tid, parent=parent, title=title, btih=btih, dt=dt, nbytes=nbytes)
         torrent.put()
 
@@ -36,6 +36,11 @@ class Torrent(ndb.Model):
         nbytes = int(d['nbytes'])
         # TODO description
         cls.save_torrent(tid, title, btih, dt, nbytes)
+
+    @classmethod
+    def get_latest_for_category(cls, cat, num_items):
+        """Returns last num_items torrent in specified category and/or its subcategories"""
+        return cls.query(ancestor=cat.key).order(-cls.dt).fetch(num_items)
 
 
 class Account(ndb.Model):
@@ -78,3 +83,11 @@ class Category(ndb.Model):
     def get_root_key(cls):
         """Returns root category key for ancestor queries"""
         return ndb.Key(cls, 'r0')
+
+    @classmethod
+    def get_changed(cls):
+        return [cls.get_root_key().get()]  # TODO
+
+    def get_num_id(self):
+        """Returns numeric id for category, as a string"""
+        return self.key.id()[1:]
