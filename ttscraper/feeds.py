@@ -19,7 +19,7 @@ jinja2_env.filters['rfc822date'] = lambda v: util.datetime_to_rfc822(v)
 def build_and_save_for_category(cat, store, prefix):
     """Build and save feeds for category"""
     feed = build_feed(cat)
-    save_feeds(store, feed, prefix, cat.get_num_id())
+    save_feeds(store, feed, prefix, cat.key.id())
 
 
 def build_feed(cat):

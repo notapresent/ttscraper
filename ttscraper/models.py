@@ -87,7 +87,3 @@ class Category(ndb.Model):
     @classmethod
     def get_changed(cls):
         return [cls.get_root_key().get()]  # TODO
-
-    def get_num_id(self):
-        """Returns numeric id for category, as a string"""
-        return self.key.id()[1:]
