@@ -13,7 +13,7 @@ endif
 init:
 	pip install -r requirements.txt
 	rm -rf ttupdater/lib/*
-	pip install -r requirements-prod.txt -t ttupdater/lib
+	pip install -r requirements-prod.txt -t ttscraper/lib
 
 test:
-	cd ttupdater && $(PYTHON) testrunner.py $(APPENGINE) .
+	cd ttscraper && $(PYTHON) testrunner.py $(APPENGINE) .
