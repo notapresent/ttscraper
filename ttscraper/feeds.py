@@ -4,7 +4,7 @@ import datetime
 from jinja2 import Environment, PackageLoader
 from google.appengine.api import app_identity
 
-import models
+import dao
 import util
 
 
@@ -16,16 +16,17 @@ jinja2_env = Environment(
 jinja2_env.filters['rfc822date'] = lambda v: util.datetime_to_rfc822(v)
 
 
-def build_and_save_for_category(cat, store, prefix):
+def build_and_save_for_category(cat_key, store, prefix):
     """Build and save feeds for category"""
+    cat = cat_key.get()
     feed = build_feed(cat)
-    save_feeds(store, feed, prefix, cat.key.id())
+    save_feeds(store, feed, prefix, cat_key.id())
 
 
 def build_feed(cat):
     """Build feed for category"""
     feed = Feed(title=cat.title, link=get_app_url())
-    items = models.Torrent.get_latest_for_category(cat, feed_size(cat))
+    items = dao.latest_torrents(feed_size(cat), cat.key)
     for item in items:
         feed.add_item(item)
     return feed

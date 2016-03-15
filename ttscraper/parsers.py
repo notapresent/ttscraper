@@ -1,9 +1,7 @@
 # coding: utf-8
 """Everythong related to parsing tracker responses"""
 import urlparse
-from lxml import etree, cssselect
-
-from debug import debug_dump
+from lxml import etree
 
 
 class BaseParser(object):
