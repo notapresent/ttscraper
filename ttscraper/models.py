@@ -29,5 +29,5 @@ class Category(ndb.Model):
     """Represents category entry"""
     title = ndb.StringProperty(indexed=False, required=True)
     num_torrents = ndb.IntegerProperty(indexed=True, required=True, default=0)
-    is_leaf = ndb.BooleanProperty(indexed=True)
-    last_changed = ndb.DateTimeProperty()
+    dirty = ndb.BooleanProperty(indexed=True, default=True)       # This flag is set when torrent is added to category
+
