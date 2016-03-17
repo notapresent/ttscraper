@@ -7,6 +7,20 @@ from google.appengine.ext import ndb
 from models import Torrent, Category, Account
 
 
+# Generic functions
+
+def get_from_key(key):
+    """Return entity from key"""
+    return key.get()
+
+
+def write_multi(entities):
+    """Write multiple entities at once"""
+    ndb.put_multi(entities)
+
+
+# Torrent-related functions
+
 def latest_torrent_dt():
     """Returns datetime for most recent torrent or start of epoch if no torrents"""
     latest_torrent = Torrent.query().order(-Torrent.dt).get()
@@ -24,19 +38,12 @@ def latest_torrents(num_items, cat_key=None):
     return Torrent.query(ancestor=cat_key).order(-Torrent.dt).fetch(num_items)
 
 
-def save_torrent(key, fields):
+def make_torrent(parent, fields):
     """Save torrent, identified by key"""
-    t = Torrent(key=key, **fields)
-    t.put()
+    return Torrent(parent=parent, **fields)
 
 
-def torrent_key(categories, tid):
-    """Make full key for torrent entry"""
-    return ndb.Key(Category, 'r0', Torrent, tid)    # FIXME
-    pairs = [(Category, '{}{}'.format(cat[1], cat[0])) for cat in categories]
-    pairs.append((Torrent, tid))
-    return ndb.Key(pairs=pairs)
-
+# Category-related functions
 
 def root_category_key():
     """Returns root category key"""
@@ -48,8 +55,29 @@ def changed_cat_keys(dt):
     return [root_category_key()]  # TODO
 
 
+def category_key_from_tuples(cat_tuples):
+    """"Makes full category key from list of category tuples"""
+    pairs = [(Category, '{}{}'.format(cat[1], cat[0])) for cat in cat_tuples]
+    return ndb.Key(pairs=pairs)
+
+
+def make_category(key, title):
+    """Make category entity with key and title"""
+    return Category(key=key, title=title)
+
+
+# def make_categories(cat_list):
+#     """Recursively create and return categories (without saving)"""
+#     cat_tuple = cat_list.pop()
+#     cat_key = category_key([cat_tuple])
+#     cat = cat_get.get()
+
+
+
+# Account-related functions
+
 def get_account():
-    """Return one entry"""
+    """Return one account"""
     return Account.query().get()
 
 
